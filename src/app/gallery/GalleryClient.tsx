@@ -1,0 +1,268 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAppBaseContext } from "@/components/providers/AppProvider";
+import { Heart, ExternalLink, Trophy, Users, AlertCircle, Maximize2, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ProjectUI } from "@/types";
+import { castVote, removeVote } from "@/actions/votes";
+import { deleteProject } from "@/actions/projects";
+import VoteModal from "@/components/VoteModal";
+import WinnerOverlay from "@/components/WinnerOverlay";
+
+export default function GalleryClient({ 
+  initialProjects, 
+  initialVotesMap, 
+  initialStatus 
+}: { 
+  initialProjects: ProjectUI[], 
+  initialVotesMap: Record<string, string>, 
+  initialStatus: string 
+}) {
+  const { currentUser } = useAppBaseContext();
+  const router = useRouter();
+  
+  const [projects, setProjects] = useState<ProjectUI[]>(initialProjects);
+  const [votesMap, setVotesMap] = useState<Record<string, string>>(initialVotesMap);
+  const [votingStatus, setVotingStatus] = useState(initialStatus);
+  
+  const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
+  const [winnerOverlayOpen, setWinnerOverlayOpen] = useState(false);
+
+  // Polling every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [router]);
+
+  // Sync props to state if props update from router.refresh()
+  useEffect(() => {
+    setProjects(initialProjects);
+    setVotesMap(initialVotesMap);
+    
+    if (votingStatus !== "ended" && initialStatus === "ended") {
+      // Trigger winner overlay if it just ended!
+      setWinnerOverlayOpen(true);
+    }
+    setVotingStatus(initialStatus);
+  }, [initialProjects, initialVotesMap, initialStatus]);
+
+  const handleDelete = async (projectId: string) => {
+    const password = window.prompt("프로젝트를 삭제하려면 등록 시 입력한 비밀번호를 입력해주세요.");
+    if (!password) {
+      alert("비밀번호 입력이 취소되었거나 빈 값입니다.");
+      return;
+    }
+
+    try {
+      const res = await deleteProject(projectId, password);
+      if (!res?.success) {
+        alert(res?.error || "삭제에 실패했습니다.");
+      } else {
+        alert("성공적으로 삭제되었습니다.");
+        setProjects((prev) => prev.filter(p => p.id !== projectId));
+        router.refresh();
+      }
+    } catch (e) {
+      alert("삭제 중 서버 통신 오류가 발생했습니다.");
+    }
+  };
+
+  const sortedProjects = [...projects].sort((a, b) => b.votes - a.votes);
+
+  const currentUserId = currentUser ? `${currentUser.name}_${currentUser.teamNumber || 'obs'}` : null;
+  const myVotedProjectId = currentUserId ? votesMap[currentUserId] : null;
+
+  return (
+    <div className="max-w-7xl mx-auto w-full px-4 py-12 relative">
+      <div className="mb-12">
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">프로젝트 갤러리</h1>
+        <p className="text-gray-600 text-lg max-w-2xl">
+          해커톤 참가자들의 열정이 담긴 결과물입니다. 
+          팀당 딱 1번의 투표가 가능하니, 가장 마음에 드는 프로젝트에 투표해주세요!
+        </p>
+      </div>
+
+      {votingStatus !== "active" && (
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 mb-10 flex items-start gap-4">
+          <AlertCircle className="text-rose-500 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-rose-800">투표 안내</h3>
+            <p className="text-rose-700 mt-1">지금은 투표 가능 시간이 아닙니다. 행사 진행 안내에 따라 투표 시간이 되면 참여해주세요.</p>
+          </div>
+        </div>
+      )}
+
+      {votingStatus === "active" && (
+        <div className="flex justify-center mb-10">
+          <button 
+            onClick={() => setIsVoteModalOpen(true)}
+            className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-xl transition-all hover:-translate-y-1 active:scale-95 flex items-center gap-3 text-lg"
+          >
+            <Heart size={24} className="fill-white" />
+            가장 마음에 드는 서비스를 선택해 주세요
+          </button>
+        </div>
+      )}
+
+      {!currentUser && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-10 flex items-start gap-4">
+          <AlertCircle className="text-amber-500 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-amber-800">투표 참여 안내</h3>
+            <p className="text-amber-700 mt-1 mb-3">투표를 하시려면 로그인이 필요합니다. 이름과 역할을 입력하고 간편하게 로그인하세요.</p>
+            <Link 
+              href="/login" 
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-amber-600 hover:bg-amber-700 focus:outline-none"
+            >
+              로그인하러 가기
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {sortedProjects.length === 0 ? (
+        <div className="text-center py-24 bg-white rounded-3xl border border-gray-100 shadow-sm">
+          <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-500">등록된 프로젝트가 없습니다</h3>
+          <p className="text-gray-400 mt-2">첫 번째 프로젝트를 제출해보세요!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {sortedProjects.map((project, index) => {
+            const isRank1 = index === 0 && project.votes > 0;
+            const isRank2 = index === 1 && project.votes > 0;
+            const isRank3 = index === 2 && project.votes > 0;
+            
+            const hasVotedForThis = myVotedProjectId === project.id;
+            const isMyProject = Boolean(currentUser?.teamNumber != null && Number(currentUser.teamNumber) === Number(project.teamNumber));
+
+            return (
+              <ProjectCard 
+                key={project.id}
+                project={project}
+                isRank1={isRank1}
+                isRank2={isRank2}
+                isRank3={isRank3}
+                hasVotedForThis={hasVotedForThis}
+                isMyProject={isMyProject}
+                onDelete={() => handleDelete(project.id)}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {isVoteModalOpen && (
+        <VoteModal 
+          projects={sortedProjects}
+          currentUser={currentUser}
+          onClose={() => setIsVoteModalOpen(false)}
+        />
+      )}
+
+      {winnerOverlayOpen && sortedProjects.length > 0 && (
+        <WinnerOverlay 
+          winnerProject={sortedProjects[0]} 
+          totalVotes={votesMap ? Object.keys(votesMap).length : 0}
+          onClose={() => setWinnerOverlayOpen(false)} 
+        />
+      )}
+    </div>
+  );
+}
+
+function ProjectCard({ 
+  project, 
+  isRank1, 
+  isRank2, 
+  isRank3,
+  hasVotedForThis,
+  isMyProject,
+  onDelete
+}: { 
+  project: ProjectUI, 
+  isRank1: boolean, 
+  isRank2: boolean, 
+  isRank3: boolean,
+  hasVotedForThis: boolean,
+  isMyProject?: boolean,
+  onDelete?: () => void
+}) {
+  return (
+    <div className={`relative bg-white rounded-3xl shadow-lg border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl overflow-hidden flex flex-col h-full
+      ${isRank1 ? 'border-yellow-400 border-2' : 
+        isRank2 ? 'border-slate-300 border-2' : 
+        isRank3 ? 'border-amber-600/50 border-2' : 'border-gray-100'}
+    `}>
+      {/* Ranking Ribbon */}
+      {(isRank1 || isRank2 || isRank3) && (
+        <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-xl font-bold text-sm tracking-wide z-10 flex items-center gap-1
+          ${isRank1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-950 shadow-sm' : 
+            isRank2 ? 'bg-gradient-to-r from-slate-300 to-slate-400 text-slate-900 shadow-sm' : 
+            'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-sm'}
+        `}>
+          <Trophy size={14} />
+          {isRank1 ? '1위' : isRank2 ? '2위' : '3위'}
+        </div>
+      )}
+      
+      {/* Card Content Area */}
+      <div className="p-6 flex-1 flex flex-col">
+        <div className="flex items-start justify-between mb-2 mt-4 cursor-default">
+          <h3 className="text-xl font-bold text-gray-900 line-clamp-2 leading-tight">
+            {project.title}
+          </h3>
+          {isMyProject && (
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onDelete) onDelete();
+              }}
+              title="이 프로젝트 삭제하기"
+              className="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-colors flex-shrink-0"
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2 text-gray-600 mb-6 bg-gray-50 px-3 py-2 rounded-lg w-fit">
+          <Users size={16} className="text-gray-400" />
+          <span className="font-medium text-sm">{project.teamNumber}조</span>
+        </div>
+        
+        <div className="text-sm text-gray-600 mb-6 flex-1 prose prose-sm max-w-none line-clamp-4" dangerouslySetInnerHTML={{ __html: project.description }} />
+        
+        <div className="flex items-center gap-3 mt-auto pt-6 border-t border-gray-100">
+          <a
+            href={project.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 transition-colors"
+          >
+            보러가기 <ExternalLink size={18} />
+          </a>
+          
+          {hasVotedForThis && (
+            <div className="flex items-center gap-2 px-5 py-3 rounded-xl bg-pink-50 text-pink-600 border border-pink-200 font-bold" title="내 투표">
+              <Heart size={20} className="fill-pink-500 text-pink-500" />
+              {project.votes}
+            </div>
+          )}
+          {!hasVotedForThis && (
+            <div className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-gray-500 border border-gray-100 bg-gray-50">
+              <Heart size={20} />
+              {project.votes}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

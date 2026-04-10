@@ -8,13 +8,14 @@ interface TopicData {
   description: string;
 }
 
-export default function TopicSection() {
+export default function TopicSection({ initialTopic }: { initialTopic: { title: string, description: string } }) {
   const [isOpen, setIsOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [error, setError] = useState("");
-  const [topic, setTopic] = useState<TopicData | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  
+  const topic = initialTopic;
 
   useEffect(() => {
     setIsMounted(true);
@@ -22,19 +23,8 @@ export default function TopicSection() {
     if (revealed === "true") {
       setIsUnlocked(true);
       setIsOpen(true);
-      fetchTopic();
     }
   }, []);
-
-  const fetchTopic = async () => {
-    try {
-      const res = await fetch('/api/topic');
-      const data = await res.json();
-      setTopic(data);
-    } catch (err) {
-      console.error("Failed to fetch topic:", err);
-    }
-  };
 
   const handleToggle = (e: React.MouseEvent<HTMLDetailsElement>) => {
     e.preventDefault();
@@ -49,7 +39,7 @@ export default function TopicSection() {
       setIsUnlocked(true);
       setError("");
       localStorage.setItem("topicRevealed", "true");
-      fetchTopic();
+      localStorage.setItem("topicRevealed", "true");
     } else {
       setError("비밀번호가 올바르지 않습니다.");
     }

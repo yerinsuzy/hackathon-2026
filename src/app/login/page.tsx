@@ -35,7 +35,7 @@ export default function LoginPage() {
     login({
       name: name.trim(),
       isParticipant,
-      teamNumber: isParticipant ? teamNumber : null
+      teamNumber: isParticipant && teamNumber ? parseInt(teamNumber, 10) : null
     });
     
     router.push("/");

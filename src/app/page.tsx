@@ -1,14 +1,23 @@
 import Link from "next/link";
 import { Calendar, MapPin, Target, Sparkles, ChevronRight, Clock, ChevronDown } from "lucide-react";
 import TopicSection from "@/components/home/TopicSection";
+import { getTopicObj } from "@/actions/admin";
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
   const schedule = [
     { time: "10:00 - 11:30", title: "아이디에이션", desc: "주제에 맞춘 아이디어 발상 및 기획" },
     { time: "13:00 - 16:00", title: "바이브코딩", desc: "본격적인 프로토타입 디자인 및 개발" },
     { time: "16:00 - 17:00", title: "완성본 제출 및 쇼케이스", desc: "프로젝트 업로드 및 상호 평가" },
     { time: "17:00 - 17:30", title: "시상 및 마무리", desc: "우수작 발표 및 클로징" },
   ];
+
+  const topicObj = await getTopicObj();
+  let parsedTopic = { title: "", description: "" };
+  try {
+    parsedTopic = JSON.parse(topicObj.content);
+  } catch (e) {}
 
   return (
     <div className="w-full">
@@ -30,7 +39,7 @@ export default function Home() {
             Zero to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Product</span>
           </h1>
           
-          <TopicSection />
+          <TopicSection initialTopic={parsedTopic} />
           
 
         </div>
