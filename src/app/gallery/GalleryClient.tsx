@@ -29,6 +29,9 @@ export default function GalleryClient({
   
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
   const [winnerOverlayOpen, setWinnerOverlayOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Polling every 30 seconds
   useEffect(() => {
@@ -50,24 +53,29 @@ export default function GalleryClient({
     setVotingStatus(initialStatus);
   }, [initialProjects, initialVotesMap, initialStatus]);
 
-  const handleDelete = async (projectId: string) => {
-    const password = window.prompt("프로젝트를 삭제하려면 등록 시 입력한 비밀번호를 입력해주세요.");
-    if (!password) {
-      alert("비밀번호 입력이 취소되었거나 빈 값입니다.");
+  const confirmDelete = async () => {
+    if (!projectToDelete) return;
+    if (!deletePassword) {
+      alert("비밀번호를 입력해주세요.");
       return;
     }
 
+    setIsDeleting(true);
     try {
-      const res = await deleteProject(projectId, password);
+      const res = await deleteProject(projectToDelete, deletePassword);
       if (!res?.success) {
         alert(res?.error || "삭제에 실패했습니다.");
       } else {
         alert("성공적으로 삭제되었습니다.");
-        setProjects((prev) => prev.filter(p => p.id !== projectId));
+        setProjects((prev) => prev.filter(p => p.id !== projectToDelete));
         router.refresh();
       }
     } catch (e) {
       alert("삭제 중 서버 통신 오류가 발생했습니다.");
+    } finally {
+      setIsDeleting(false);
+      setProjectToDelete(null);
+      setDeletePassword("");
     }
   };
 
@@ -149,7 +157,7 @@ export default function GalleryClient({
                 isRank3={isRank3}
                 hasVotedForThis={hasVotedForThis}
                 isMyProject={isMyProject}
-                onDelete={() => handleDelete(project.id)}
+                onDelete={() => setProjectToDelete(project.id)}
               />
             );
           })}
@@ -170,6 +178,55 @@ export default function GalleryClient({
           totalVotes={votesMap ? Object.keys(votesMap).length : 0}
           onClose={() => setWinnerOverlayOpen(false)} 
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {projectToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">프로젝트 삭제</h3>
+              <p className="text-gray-600 mb-6 text-sm">
+                정말로 이 프로젝트를 삭제하시겠습니까? 등록 시 입력했던 비밀번호를 입력해주세요.
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <input
+                    type="password"
+                    placeholder="비밀번호"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-shadow"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') confirmDelete();
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
+              <button
+                onClick={() => {
+                  setProjectToDelete(null);
+                  setDeletePassword("");
+                }}
+                disabled={isDeleting}
+                className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50"
+              >
+                {isDeleting ? "삭제 중..." : "위험: 삭제하기"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
