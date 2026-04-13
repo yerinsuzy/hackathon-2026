@@ -32,6 +32,7 @@ export default function GalleryClient({
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [votingProjectId, setVotingProjectId] = useState<string | null>(null);
 
   // Polling every 30 seconds
   useEffect(() => {
@@ -76,6 +77,49 @@ export default function GalleryClient({
       setIsDeleting(false);
       setProjectToDelete(null);
       setDeletePassword("");
+    }
+  };
+
+  const handleCardVote = async (projectId: string, isRemoving: boolean = false) => {
+    if (!currentUser) {
+      alert("로그인이 필요합니다. 아래 로그인 버튼을 눌러주세요.");
+      return;
+    }
+    if (votingStatus !== "active") {
+      alert("지금은 투표 가능 시간이 아닙니다.");
+      return;
+    }
+
+    const clickedProject = projects.find(p => p.id === projectId);
+    if (currentUser.isParticipant && clickedProject?.teamNumber === currentUser.teamNumber) {
+      alert("자신이 속한 조의 프로젝트에는 투표할 수 없습니다.");
+      return;
+    }
+
+    setVotingProjectId(projectId);
+    try {
+      if (isRemoving) {
+        const res = await removeVote({
+          voterName: currentUser.name,
+          voterTeam: currentUser.teamNumber,
+          isParticipant: currentUser.isParticipant
+        });
+        if (res.success) router.refresh();
+        else alert("투표 취소에 실패했습니다.");
+      } else {
+        const res = await castVote({
+          projectId: projectId,
+          voterName: currentUser.name,
+          voterTeam: currentUser.teamNumber,
+          isParticipant: currentUser.isParticipant
+        });
+        if (res.success) router.refresh();
+        else alert("투표에 실패했습니다.");
+      }
+    } catch {
+      alert("서버 오류가 발생했습니다.");
+    } finally {
+      setVotingProjectId(null);
     }
   };
 
@@ -158,6 +202,9 @@ export default function GalleryClient({
                 hasVotedForThis={hasVotedForThis}
                 isMyProject={isMyProject}
                 onDelete={() => setProjectToDelete(project.id)}
+                onVote={() => handleCardVote(project.id, false)}
+                onRemoveVote={() => handleCardVote(project.id, true)}
+                isVotingLoading={votingProjectId === project.id}
               />
             );
           })}
@@ -239,7 +286,10 @@ function ProjectCard({
   isRank3,
   hasVotedForThis,
   isMyProject,
-  onDelete
+  onDelete,
+  onVote,
+  onRemoveVote,
+  isVotingLoading
 }: { 
   project: ProjectUI, 
   isRank1: boolean, 
@@ -247,7 +297,10 @@ function ProjectCard({
   isRank3: boolean,
   hasVotedForThis: boolean,
   isMyProject?: boolean,
-  onDelete?: () => void
+  onDelete?: () => void,
+  onVote?: () => void,
+  onRemoveVote?: () => void,
+  isVotingLoading?: boolean
 }) {
   return (
     <div className={`relative bg-white rounded-3xl shadow-lg border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl overflow-hidden flex flex-col h-full
@@ -307,16 +360,33 @@ function ProjectCard({
           </a>
           
           {hasVotedForThis && (
-            <div className="flex items-center gap-2 px-5 py-3 rounded-xl bg-pink-50 text-pink-600 border border-pink-200 font-bold" title="내 투표">
-              <Heart size={20} className="fill-pink-500 text-pink-500" />
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemoveVote?.(); }}
+              disabled={isVotingLoading}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-bold transition-all
+                ${isVotingLoading ? 'bg-pink-100 text-pink-400 border-pink-200 cursor-wait' : 'bg-pink-50 text-pink-600 border-pink-200 hover:bg-pink-100 hover:scale-105 active:scale-95'}`}
+              title="내 투표 취소하기"
+            >
+              <Heart size={20} className={isVotingLoading ? "text-pink-400" : "fill-pink-500 text-pink-500"} />
               {project.votes}
-            </div>
+            </button>
           )}
           {!hasVotedForThis && (
-            <div className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-gray-500 border border-gray-100 bg-gray-50">
-              <Heart size={20} />
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onVote?.(); }}
+              disabled={isVotingLoading || isMyProject}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-bold transition-all
+                ${isMyProject 
+                  ? 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed'
+                  : isVotingLoading 
+                    ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-wait' 
+                    : 'bg-white text-gray-500 border-gray-200 hover:border-pink-300 hover:text-pink-500 hover:bg-pink-50 hover:scale-105 active:scale-95'
+                }`}
+              title={isMyProject ? "내 프로젝트에는 투표할 수 없습니다" : "이 프로젝트에 투표하기"}
+            >
+              <Heart size={20} className={isVotingLoading ? "animate-pulse" : ""} />
               {project.votes}
-            </div>
+            </button>
           )}
         </div>
       </div>
