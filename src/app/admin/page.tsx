@@ -31,7 +31,11 @@ export default async function AdminPage() {
   projects.forEach(p => votingDetails[p.id] = []);
   votes.forEach(v => {
     if (votingDetails[v.projectId]) {
-      votingDetails[v.projectId].push(v);
+      votingDetails[v.projectId].push({
+        name: v.voterName,
+        teamNumber: v.voterTeam,
+        isParticipant: v.isParticipant
+      });
     }
   });
 
