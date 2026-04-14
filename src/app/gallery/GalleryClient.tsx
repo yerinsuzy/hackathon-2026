@@ -33,6 +33,7 @@ export default function GalleryClient({
   const [deletePassword, setDeletePassword] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [votingProjectId, setVotingProjectId] = useState<string | null>(null);
+  const [isRevealing, setIsRevealing] = useState(false);
 
   // Polling every 30 seconds
   useEffect(() => {
@@ -116,6 +117,14 @@ export default function GalleryClient({
     } finally {
       setVotingProjectId(null);
     }
+  };
+
+  const handleRevealWinner = () => {
+    setIsRevealing(true);
+    setTimeout(() => {
+      setIsRevealing(false);
+      setWinnerOverlayOpen(true);
+    }, 3000); // 3 seconds of suspense!
   };
 
   const visibleProjects = [...projects].sort((a, b) => a.teamNumber - b.teamNumber);
@@ -203,13 +212,23 @@ export default function GalleryClient({
       {/* Admin Revealed Winner Button */}
       {votingStatus === "ended" && actualWinner && (
         <div className="flex justify-center mt-8 mb-16">
-          <button 
-            onClick={() => setWinnerOverlayOpen(true)}
-            className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-extrabold rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-4 text-2xl"
-          >
-            <Trophy size={32} className="fill-white" />
-            🏆 1위 결과 보러가기
-          </button>
+          {isRevealing ? (
+            <button 
+              disabled
+              className="px-12 py-5 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-extrabold rounded-full shadow-2xl flex items-center gap-4 text-2xl animate-pulse"
+            >
+              <span className="animate-bounce text-3xl inline-block -mt-2">🥁</span> 
+              두구두구두구...
+            </button>
+          ) : (
+            <button 
+              onClick={handleRevealWinner}
+              className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-extrabold rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-4 text-2xl"
+            >
+              <Trophy size={32} className="fill-white" />
+              🏆 1위 결과 보러가기
+            </button>
+          )}
         </div>
       )}
 
