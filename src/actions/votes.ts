@@ -10,15 +10,12 @@ export async function castVote(data: {
   isParticipant: boolean;
 }) {
   try {
-    // Determine the unique key based on participant status
-    // If they aren't a participant, voterTeam is null. 
-    // Prisma treats unique constraint with null carefully (in SQLite it might allow multiple nulls,
-    // so we should ideally mock observer teams if needed, or simply delete their old vote manually).
+    const safeVoterTeam = data.voterTeam ? Number(data.voterTeam) : null;
     
     // First, find if they already voted
     const existingVote = await prisma.vote.findFirst({
       where: data.isParticipant
-        ? { voterName: data.voterName, voterTeam: data.voterTeam }
+        ? { voterName: data.voterName, voterTeam: safeVoterTeam }
         : { voterName: data.voterName, isParticipant: false },
     });
 
@@ -35,7 +32,7 @@ export async function castVote(data: {
       data: {
         projectId: data.projectId,
         voterName: data.voterName,
-        voterTeam: data.voterTeam,
+        voterTeam: safeVoterTeam,
         isParticipant: data.isParticipant,
       },
     });
@@ -55,9 +52,11 @@ export async function removeVote(data: {
   isParticipant: boolean;
 }) {
   try {
+    const safeVoterTeam = data.voterTeam ? Number(data.voterTeam) : null;
+
     const existingVote = await prisma.vote.findFirst({
       where: data.isParticipant
-        ? { voterName: data.voterName, voterTeam: data.voterTeam }
+        ? { voterName: data.voterName, voterTeam: safeVoterTeam }
         : { voterName: data.voterName, isParticipant: false },
     });
 
