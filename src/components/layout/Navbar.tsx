@@ -37,7 +37,7 @@ export default function Navbar() {
                 H
               </div>
               <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight">
-                2026 zero to product
+                2026 Zero to Product
               </span>
             </Link>
           </div>

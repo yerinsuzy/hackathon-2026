@@ -7,7 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "2026 zero to product | Company Hackathon Web Platform",
+  title: "2026 Zero to Product | Company Hackathon Web Platform",
   description: "Join our annual hackathon event, vote for projects, and innovate together.",
 };
 
@@ -26,7 +26,7 @@ export default function RootLayout({
           </main>
           <footer className="w-full border-t border-gray-200 bg-white py-8 mt-auto">
             <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
-              <p>&copy; {new Date().getFullYear()} 2026 zero to product. Built for the company hackathon.</p>
+              <p>&copy; {new Date().getFullYear()} 2026 Zero to Product. Built for the company hackathon.</p>
             </div>
           </footer>
         </AppProvider>
