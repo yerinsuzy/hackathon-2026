@@ -46,11 +46,6 @@ export default function GalleryClient({
   useEffect(() => {
     setProjects(initialProjects);
     setVotesMap(initialVotesMap);
-    
-    if (votingStatus !== "ended" && initialStatus === "ended") {
-      // Trigger winner overlay if it just ended!
-      setWinnerOverlayOpen(true);
-    }
     setVotingStatus(initialStatus);
   }, [initialProjects, initialVotesMap, initialStatus]);
 
@@ -123,7 +118,8 @@ export default function GalleryClient({
     }
   };
 
-  const sortedProjects = [...projects].sort((a, b) => b.votes - a.votes);
+  const visibleProjects = [...projects].sort((a, b) => a.teamNumber - b.teamNumber);
+  const actualWinner = [...projects].sort((a, b) => b.votes - a.votes)[0];
 
   const currentUserId = currentUser ? `${currentUser.name}_${currentUser.teamNumber || 'obs'}` : null;
   const myVotedProjectId = currentUserId ? votesMap[currentUserId] : null;
@@ -176,19 +172,15 @@ export default function GalleryClient({
         </div>
       )}
 
-      {sortedProjects.length === 0 ? (
+      {visibleProjects.length === 0 ? (
         <div className="text-center py-24 bg-white rounded-3xl border border-gray-100 shadow-sm">
           <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-500">등록된 프로젝트가 없습니다</h3>
           <p className="text-gray-400 mt-2">첫 번째 프로젝트를 제출해보세요!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sortedProjects.map((project, index) => {
-            const isRank1 = index === 0 && project.votes > 0;
-            const isRank2 = index === 1 && project.votes > 0;
-            const isRank3 = index === 2 && project.votes > 0;
-            
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {visibleProjects.map((project, index) => {
             const hasVotedForThis = myVotedProjectId === project.id;
             const isMyProject = Boolean(currentUser?.teamNumber != null && Number(currentUser.teamNumber) === Number(project.teamNumber));
 
@@ -196,9 +188,6 @@ export default function GalleryClient({
               <ProjectCard 
                 key={project.id}
                 project={project}
-                isRank1={isRank1}
-                isRank2={isRank2}
-                isRank3={isRank3}
                 hasVotedForThis={hasVotedForThis}
                 isMyProject={isMyProject}
                 onDelete={() => setProjectToDelete(project.id)}
@@ -211,17 +200,30 @@ export default function GalleryClient({
         </div>
       )}
 
+      {/* Admin Revealed Winner Button */}
+      {votingStatus === "ended" && actualWinner && (
+        <div className="flex justify-center mt-8 mb-16">
+          <button 
+            onClick={() => setWinnerOverlayOpen(true)}
+            className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-extrabold rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-4 text-2xl"
+          >
+            <Trophy size={32} className="fill-white" />
+            🏆 1위 결과 보러가기
+          </button>
+        </div>
+      )}
+
       {isVoteModalOpen && (
         <VoteModal 
-          projects={sortedProjects}
+          projects={visibleProjects}
           currentUser={currentUser}
           onClose={() => setIsVoteModalOpen(false)}
         />
       )}
 
-      {winnerOverlayOpen && sortedProjects.length > 0 && (
+      {winnerOverlayOpen && actualWinner && (
         <WinnerOverlay 
-          winnerProject={sortedProjects[0]} 
+          winnerProject={actualWinner} 
           totalVotes={votesMap ? Object.keys(votesMap).length : 0}
           onClose={() => setWinnerOverlayOpen(false)} 
         />
@@ -281,9 +283,6 @@ export default function GalleryClient({
 
 function ProjectCard({ 
   project, 
-  isRank1, 
-  isRank2, 
-  isRank3,
   hasVotedForThis,
   isMyProject,
   onDelete,
@@ -292,9 +291,6 @@ function ProjectCard({
   isVotingLoading
 }: { 
   project: ProjectUI, 
-  isRank1: boolean, 
-  isRank2: boolean, 
-  isRank3: boolean,
   hasVotedForThis: boolean,
   isMyProject?: boolean,
   onDelete?: () => void,
@@ -303,22 +299,7 @@ function ProjectCard({
   isVotingLoading?: boolean
 }) {
   return (
-    <div className={`relative bg-white rounded-3xl shadow-lg border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl overflow-hidden flex flex-col h-full
-      ${isRank1 ? 'border-yellow-400 border-2' : 
-        isRank2 ? 'border-slate-300 border-2' : 
-        isRank3 ? 'border-amber-600/50 border-2' : 'border-gray-100'}
-    `}>
-      {/* Ranking Ribbon */}
-      {(isRank1 || isRank2 || isRank3) && (
-        <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-xl font-bold text-sm tracking-wide z-10 flex items-center gap-1
-          ${isRank1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-950 shadow-sm' : 
-            isRank2 ? 'bg-gradient-to-r from-slate-300 to-slate-400 text-slate-900 shadow-sm' : 
-            'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-sm'}
-        `}>
-          <Trophy size={14} />
-          {isRank1 ? '1위' : isRank2 ? '2위' : '3위'}
-        </div>
-      )}
+    <div className="relative bg-white rounded-3xl shadow-lg border border-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl overflow-hidden flex flex-col h-full">
       
       {/* Card Content Area */}
       <div className="p-6 flex-1 flex flex-col">
@@ -368,7 +349,6 @@ function ProjectCard({
               title="내 투표 취소하기"
             >
               <Heart size={20} className={isVotingLoading ? "text-pink-400" : "fill-pink-500 text-pink-500"} />
-              {project.votes}
             </button>
           )}
           {!hasVotedForThis && (
@@ -385,7 +365,6 @@ function ProjectCard({
               title={isMyProject ? "내 프로젝트에는 투표할 수 없습니다" : "이 프로젝트에 투표하기"}
             >
               <Heart size={20} className={isVotingLoading ? "animate-pulse" : ""} />
-              {project.votes}
             </button>
           )}
         </div>
