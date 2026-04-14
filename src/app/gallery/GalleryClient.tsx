@@ -139,7 +139,7 @@ export default function GalleryClient({
         <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">프로젝트 갤러리</h1>
         <p className="text-gray-600 text-lg max-w-2xl">
           해커톤 참가자들의 열정이 담긴 결과물입니다. 
-          팀당 딱 1번의 투표가 가능하니, 가장 마음에 드는 프로젝트에 투표해주세요!
+          제일 마음에 드는 1조에게만 투표가 가능하니, 가장 마음에 드는 프로젝트에 투표해주세요!
         </p>
       </div>
 
