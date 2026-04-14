@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Calendar, MapPin, Target, Sparkles, ChevronRight, Clock, ChevronDown } from "lucide-react";
 import TopicSection from "@/components/home/TopicSection";
+import QRCodeDisplay from "@/components/home/QRCodeDisplay";
 import { getTopicObj } from "@/actions/admin";
 
 export const dynamic = 'force-dynamic';
@@ -47,6 +48,45 @@ export default async function Home() {
 
 
 
+      {/* Participation Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid lg:grid-cols-2 gap-12 items-center bg-indigo-900 rounded-[48px] overflow-hidden p-8 lg:p-16 text-white shadow-2xl relative">
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-indigo-800/50 to-transparent" />
+          
+          <div className="relative z-10 space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+                준비되셨나요? <br />
+                <span className="text-indigo-300">지금 바로 참여하세요</span>
+              </h2>
+              <p className="text-indigo-100/80 text-lg md:text-xl max-w-md">
+                팀원들과 함께 아이디어를 실현하고, 다른 팀의 혁신적인 결과물을 확인해보세요. 
+                투표를 통해 올해의 우수작을 직접 선정할 수 있습니다.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link 
+                href="/gallery" 
+                className="px-8 py-4 rounded-full bg-white text-indigo-900 font-bold flex items-center justify-center gap-2 hover:bg-indigo-50 transition-all active:scale-95"
+              >
+                제출작 보러가기 <ChevronRight size={18} />
+              </Link>
+              <Link 
+                href="/upload" 
+                className="px-8 py-4 rounded-full bg-indigo-800 text-white border border-indigo-700 font-bold flex items-center justify-center hover:bg-indigo-700 transition-all active:scale-95"
+              >
+                프로젝트 제출하기
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative z-10 flex justify-center lg:justify-end">
+            <QRCodeDisplay />
+          </div>
+        </div>
+      </section>
+
       {/* Timeline Section */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
@@ -68,21 +108,6 @@ export default async function Home() {
               <p className="text-gray-600 text-lg md:ml-28">{item.desc}</p>
             </div>
           ))}
-        </div>
-        
-        <div className="mt-16 flex flex-col sm:flex-row gap-4 justify-center w-full max-w-lg mx-auto">
-          <Link 
-            href="/gallery" 
-            className="flex-1 px-8 py-4 rounded-full bg-gray-900 text-white font-semibold flex items-center justify-center gap-2 hover:bg-gray-800 transition-transform active:scale-95 shadow-md"
-          >
-            제출작 보러가기 <ChevronRight size={18} />
-          </Link>
-          <Link 
-            href="/upload" 
-            className="flex-1 px-8 py-4 rounded-full bg-white text-gray-900 border-2 border-gray-200 font-semibold flex items-center justify-center hover:bg-gray-50 transition-transform active:scale-95 shadow-sm"
-          >
-            프로젝트 제출
-          </Link>
         </div>
       </section>
     </div>

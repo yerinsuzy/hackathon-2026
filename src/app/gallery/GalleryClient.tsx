@@ -128,7 +128,8 @@ export default function GalleryClient({
   };
 
   const visibleProjects = [...projects].sort((a, b) => a.teamNumber - b.teamNumber);
-  const actualWinner = [...projects].sort((a, b) => b.votes - a.votes)[0];
+  const maxVotes = projects.length > 0 ? Math.max(...projects.map(p => p.votes)) : 0;
+  const actualWinners = projects.filter(p => p.votes === maxVotes && maxVotes > 0);
 
   const currentUserId = currentUser ? `${currentUser.name}_${currentUser.teamNumber || 'obs'}` : null;
   const myVotedProjectId = currentUserId ? votesMap[currentUserId] : null;
@@ -139,7 +140,7 @@ export default function GalleryClient({
         <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">프로젝트 갤러리</h1>
         <p className="text-gray-600 text-lg max-w-2xl break-keep">
           해커톤 참가자들의 열정이 담긴 결과물입니다. 
-          제일 마음에 드는 1조에게만 투표가 가능하니, 신중하게 투표해주세요!
+          제일 마음에 드는 한개의 조에게만 투표가 가능하니, 신중하게 투표해주세요!
         </p>
       </div>
 
@@ -210,7 +211,7 @@ export default function GalleryClient({
       )}
 
       {/* Admin Revealed Winner Button */}
-      {votingStatus === "ended" && actualWinner && (
+      {votingStatus === "ended" && actualWinners.length > 0 && (
         <div className="flex justify-center mt-8 mb-16">
           {isRevealing ? (
             <button 
@@ -226,7 +227,7 @@ export default function GalleryClient({
               className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-extrabold rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-4 text-2xl"
             >
               <Trophy size={32} className="fill-white" />
-              🏆 1위 결과 보러가기
+              🏆 우승 결과 보러가기
             </button>
           )}
         </div>
@@ -240,9 +241,9 @@ export default function GalleryClient({
         />
       )}
 
-      {winnerOverlayOpen && actualWinner && (
+      {winnerOverlayOpen && actualWinners.length > 0 && (
         <WinnerOverlay 
-          winnerProject={actualWinner} 
+          winnerProjects={actualWinners} 
           totalVotes={votesMap ? Object.keys(votesMap).length : 0}
           onClose={() => setWinnerOverlayOpen(false)} 
         />
@@ -327,18 +328,23 @@ function ProjectCard({
             {project.title}
           </h3>
           {isMyProject && (
-            <button 
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (onDelete) onDelete();
-              }}
-              title="이 프로젝트 삭제하기"
-              className="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-colors flex-shrink-0"
-            >
-              <Trash2 size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full animate-pulse border border-indigo-200">
+                우리 팀 프로젝트 ✨
+              </span>
+              <button 
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (onDelete) onDelete();
+                }}
+                title="이 프로젝트 삭제하기"
+                className="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-colors flex-shrink-0"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
           )}
         </div>
         
@@ -351,7 +357,11 @@ function ProjectCard({
         
         <div className="flex items-center gap-3 mt-auto pt-6 border-t border-gray-100">
           <a
-            href={project.url}
+            href={(() => {
+              const url = project.url || "";
+              if (/^(http|https):\/\//i.test(url)) return url;
+              return `https://${url}`;
+            })()}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 transition-colors"
@@ -372,18 +382,24 @@ function ProjectCard({
           )}
           {!hasVotedForThis && (
             <button 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onVote?.(); }}
-              disabled={isVotingLoading || isMyProject}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                if (!isMyProject) onVote?.();
+                else alert("본인 조의 프로젝트에는 투표할 수 없습니다! 😊");
+              }}
+              disabled={isVotingLoading}
               className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-bold transition-all
                 ${isMyProject 
-                  ? 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed'
+                  ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed text-sm'
                   : isVotingLoading 
                     ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-wait' 
                     : 'bg-white text-gray-500 border-gray-200 hover:border-pink-300 hover:text-pink-500 hover:bg-pink-50 hover:scale-105 active:scale-95'
                 }`}
-              title={isMyProject ? "내 프로젝트에는 투표할 수 없습니다" : "이 프로젝트에 투표하기"}
+              title={isMyProject ? "본인 조의 프로젝트에는 투표할 수 없습니다" : "이 프로젝트에 투표하기"}
             >
-              <Heart size={20} className={isVotingLoading ? "animate-pulse" : ""} />
+              <Heart size={20} className={isVotingLoading ? "animate-pulse" : (isMyProject ? "" : "")} />
+              {isMyProject && <span>우리 팀</span>}
             </button>
           )}
         </div>

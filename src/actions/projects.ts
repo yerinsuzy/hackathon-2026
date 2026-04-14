@@ -4,6 +4,13 @@ import prisma from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 
+const normalizeUrl = (url: string) => {
+  if (!url) return "";
+  const trimmed = url.trim();
+  if (/^(http|https):\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
+
 export async function addProject(data: {
   teamNumber: number;
   title: string;
@@ -17,7 +24,7 @@ export async function addProject(data: {
     data: {
       teamNumber: data.teamNumber,
       title: data.title,
-      url: data.url,
+      url: normalizeUrl(data.url),
       description: data.description,
       password: hashedPassword,
     },
@@ -81,7 +88,7 @@ export async function updateProject(
     where: { id: projectId },
     data: {
       title: data.title,
-      url: data.url,
+      url: normalizeUrl(data.url),
       description: data.description,
     },
   });
