@@ -137,9 +137,9 @@ export default function GalleryClient({
     <div className="max-w-7xl mx-auto w-full px-4 py-12 relative">
       <div className="mb-12">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">프로젝트 갤러리</h1>
-        <p className="text-gray-600 text-lg max-w-2xl">
+        <p className="text-gray-600 text-lg max-w-2xl break-keep">
           해커톤 참가자들의 열정이 담긴 결과물입니다. 
-          제일 마음에 드는 1조에게만 투표가 가능하니, 가장 마음에 드는 프로젝트에 투표해주세요!
+          제일 마음에 드는 1조에게만 투표가 가능하니, 신중하게 투표해주세요!
         </p>
       </div>
 
