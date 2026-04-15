@@ -38,17 +38,26 @@ export async function getTopicObj() {
   let topic = await prisma.topic.findUnique({ where: { id: 1 } });
   if (!topic) {
     topic = await prisma.topic.create({
-      data: { id: 1, content: JSON.stringify({ title: "", description: "" }) },
+      data: { 
+        id: 1, 
+        content: JSON.stringify({ 
+          theme1: { title: "", example: "" }, 
+          theme2: { title: "", example: "" } 
+        }) 
+      },
     });
   }
   return topic;
 }
 
-export async function setTopicObj(title: string, description: string) {
+export async function setTopicObj(data: { 
+  theme1: { title: string, example: string }, 
+  theme2: { title: string, example: string } 
+}) {
   await prisma.topic.upsert({
     where: { id: 1 },
-    update: { content: JSON.stringify({ title, description }) },
-    create: { id: 1, content: JSON.stringify({ title, description }) },
+    update: { content: JSON.stringify(data) },
+    create: { id: 1, content: JSON.stringify(data) },
   });
   revalidatePath("/");
   revalidatePath("/admin");

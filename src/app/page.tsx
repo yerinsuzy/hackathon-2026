@@ -15,7 +15,10 @@ export default async function Home() {
   ];
 
   const topicObj = await getTopicObj();
-  let parsedTopic = { title: "", description: "" };
+  let parsedTopic = { 
+    theme1: { title: "", example: "" }, 
+    theme2: { title: "", example: "" } 
+  };
   try {
     parsedTopic = JSON.parse(topicObj.content);
   } catch (e) {}

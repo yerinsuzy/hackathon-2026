@@ -1,14 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Lock, Unlock, ChevronUp } from "lucide-react";
+import { Lock, Unlock, ChevronUp, Briefcase, Sparkles, Lightbulb } from "lucide-react";
 
-interface TopicData {
+interface Theme {
   title: string;
-  description: string;
+  example: string;
 }
 
-export default function TopicSection({ initialTopic }: { initialTopic: { title: string, description: string } }) {
+interface TopicData {
+  theme1: Theme;
+  theme2: Theme;
+}
+
+export default function TopicSection({ initialTopic }: { initialTopic: TopicData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -39,7 +44,6 @@ export default function TopicSection({ initialTopic }: { initialTopic: { title: 
       setIsUnlocked(true);
       setError("");
       localStorage.setItem("topicRevealed", "true");
-      localStorage.setItem("topicRevealed", "true");
     } else {
       setError("비밀번호가 올바르지 않습니다.");
     }
@@ -54,11 +58,11 @@ export default function TopicSection({ initialTopic }: { initialTopic: { title: 
     localStorage.removeItem("topicRevealed");
   };
 
-  if (!isMounted) return null; // Hydration 
+  if (!isMounted) return null;
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-10 relative z-50 group-topic animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="bg-gradient-to-r from-indigo-900 to-purple-900 rounded-3xl shadow-xl border border-indigo-700/50">
+    <div className="w-full max-w-5xl mx-auto mb-10 relative z-50 group-topic animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="bg-gradient-to-r from-gray-900 via-indigo-950 to-purple-950 rounded-[40px] shadow-2xl border border-white/10 overflow-hidden">
         <details 
           className="group"
           open={isOpen}
@@ -67,56 +71,130 @@ export default function TopicSection({ initialTopic }: { initialTopic: { title: 
             onClick={handleToggle}
             className="flex items-center justify-center cursor-pointer font-semibold text-white list-none [&::-webkit-details-marker]:hidden"
           >
-            <div className="flex items-center gap-2 px-6 py-4 rounded-3xl bg-white/5 hover:bg-white/10 transition-all backdrop-blur-sm">
-              {isUnlocked ? <Unlock size={16} className="text-emerald-400" /> : <Lock size={16} className="text-white/80" />}
-              <span className="tracking-wide">
-                {isUnlocked ? "오늘의 주제 공개 중" : "🔒 오늘의 주제는? (클릭하여 확인)"}
-              </span>
+            <div className="flex items-center gap-3 px-8 py-5 transition-all hover:scale-105 duration-300">
+              {isUnlocked ? (
+                <div className="flex items-center gap-2 text-emerald-400 bg-emerald-400/10 px-4 py-1.5 rounded-full border border-emerald-400/20">
+                  <Unlock size={16} />
+                  <span className="text-sm font-bold tracking-tight">주제 공개 중</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-white/90 bg-white/5 px-6 py-2.5 rounded-full border border-white/10 backdrop-blur-md">
+                  <Lock size={16} />
+                  <span className="tracking-wide">오늘의 주제는 무엇일까요? (클릭하여 확인)</span>
+                </div>
+              )}
             </div>
           </summary>
           
           {isOpen && (
-            <div className="m-2 mt-0 p-6 sm:p-8 bg-white/95 backdrop-blur-md rounded-2xl shadow-inner text-gray-800 text-lg leading-relaxed relative border border-white">
+            <div className="px-4 pb-8 sm:px-8 bg-white/5 backdrop-blur-3xl border-t border-white/5">
               {!isUnlocked ? (
-                <form onSubmit={handleUnlock} className="flex flex-col gap-3 max-w-sm mx-auto my-4 text-center">
-                  <p className="text-sm text-gray-600 mb-2 font-medium">관리자에게 전달받은 비밀번호를 입력해주세요.</p>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                <div className="max-w-md mx-auto py-12 text-center">
+                  <div className="mb-6 inline-flex p-4 bg-indigo-500/10 rounded-3xl border border-indigo-500/20 text-indigo-400">
+                    <Lock size={32} />
+                  </div>
+                  <h4 className="text-xl font-bold text-white mb-2">비밀번호 보호됨</h4>
+                  <p className="text-indigo-200/60 text-sm mb-8">모니터링 화면(Admin)에 표시된 비밀번호를 입력해주세요.</p>
+                  
+                  <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="password"
-                      placeholder="비밀번호 4자리"
+                      placeholder="PW 4자리"
                       maxLength={4}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg text-center tracking-widest bg-gray-50 uppercase"
+                      className="flex-1 px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white text-lg text-center tracking-[0.5em] font-mono"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
                     <button 
                       type="submit"
-                      className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition duration-200 shadow-sm active:scale-95"
+                      className="px-8 py-3.5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
                     >
-                      확인
+                      잠금 해제
+                    </button>
+                  </form>
+                  {error && <p className="text-rose-400 text-sm mt-4 font-semibold animate-bounce">{error}</p>}
+                </div>
+              ) : (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-700">
+                  <div className="flex justify-between items-center py-6 border-b border-white/5 mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
+                        <Lightbulb size={24} />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-white tracking-tight">Today&apos;s Hybrid Topics</h3>
+                        <p className="text-white/40 text-xs font-medium uppercase tracking-widest">두 테마 중 하나를 선택해 보세요</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={handleClose}
+                      className="p-2.5 text-white/30 hover:text-rose-400 hover:bg-rose-400/10 rounded-xl transition-all border border-transparent hover:border-rose-400/20"
+                    >
+                      <ChevronUp size={24} />
                     </button>
                   </div>
-                  {error && <p className="text-red-500 text-sm mt-2 animate-pulse font-medium">{error}</p>}
-                </form>
-              ) : (
-                <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 p-2">
-                  <div className="flex-1 text-center sm:text-left">
-                    <h3 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center sm:justify-start gap-3">
-                      <span className="text-3xl">💡</span>
-                      {topic ? topic.title : "주제를 불러오는 중..."}
-                    </h3>
-                    {topic && (
-                      <p className="mt-4 text-lg text-gray-600 max-w-3xl leading-relaxed font-medium">
-                        {topic.description}
-                      </p>
-                    )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                    {/* Theme 1: Work */}
+                    <div className="relative group/card overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-500/10 to-transparent border border-white/10 p-8 hover:border-indigo-500/30 transition-all duration-500 shadow-xl">
+                      <div className="absolute top-0 right-0 p-6 opacity-20 group-hover/card:scale-110 transition-transform duration-700 text-indigo-400">
+                        <Briefcase size={80} />
+                      </div>
+                      
+                      <div className="relative z-10">
+                        <span className="inline-block px-3 py-1 bg-indigo-500/20 text-indigo-300 text-[10px] font-black tracking-widest uppercase rounded-full border border-indigo-500/30 mb-6">
+                          Theme 01. 업무 특화
+                        </span>
+                        <h4 className="text-2xl sm:text-3xl font-black text-white mb-6 leading-tight break-keep">
+                          {topic.theme1?.title || "주제를 입력해주세요"}
+                        </h4>
+                        
+                        <div className="space-y-4">
+                          <p className="text-xs font-bold text-white/30 tracking-widest uppercase">💡 아이디어 예시</p>
+                          <ul className="space-y-3">
+                            {(topic.theme1?.example || "").split('\n').filter(line => line.trim()).map((line, idx) => (
+                              <li key={idx} className="flex items-start gap-3 group/item">
+                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover/item:scale-125 transition-transform" />
+                                <span className="text-gray-300 text-sm sm:text-base leading-relaxed break-keep font-medium">
+                                  {line}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Theme 2: Daily */}
+                    <div className="relative group/card overflow-hidden rounded-[32px] bg-gradient-to-br from-purple-500/10 to-transparent border border-white/10 p-8 hover:border-purple-500/30 transition-all duration-500 shadow-xl">
+                      <div className="absolute top-0 right-0 p-6 opacity-20 group-hover/card:scale-110 transition-transform duration-700 text-purple-400">
+                        <Sparkles size={80} />
+                      </div>
+                      
+                      <div className="relative z-10">
+                        <span className="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-[10px] font-black tracking-widest uppercase rounded-full border border-purple-500/30 mb-6">
+                          Theme 02. 일상/대중성
+                        </span>
+                        <h4 className="text-2xl sm:text-3xl font-black text-white mb-6 leading-tight break-keep">
+                          {topic.theme2?.title || "주제를 입력해주세요"}
+                        </h4>
+                        
+                        <div className="space-y-4">
+                          <p className="text-xs font-bold text-white/30 tracking-widest uppercase">💡 아이디어 예시</p>
+                          <ul className="space-y-3">
+                            {(topic.theme2?.example || "").split('\n').filter(line => line.trim()).map((line, idx) => (
+                              <li key={idx} className="flex items-start gap-3 group/item">
+                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-purple-50 group-hover/item:scale-125 transition-transform" />
+                                <span className="text-gray-300 text-sm sm:text-base leading-relaxed break-keep font-medium">
+                                  {line}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <button 
-                    onClick={handleClose}
-                    className="flex-shrink-0 px-4 py-2 mt-4 sm:mt-0 text-sm font-semibold text-gray-500 hover:text-red-600 bg-gray-100 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 group border border-gray-200 hover:border-red-200 shadow-sm"
-                  >
-                    접기 <ChevronUp size={16} className="group-hover:-translate-y-0.5 transition-transform" />
-                  </button>
                 </div>
               )}
             </div>
@@ -126,3 +204,4 @@ export default function TopicSection({ initialTopic }: { initialTopic: { title: 
     </div>
   );
 }
+

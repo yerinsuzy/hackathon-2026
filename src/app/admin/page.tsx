@@ -10,7 +10,10 @@ export default async function AdminPage() {
   const votingStatusObj = await getVotingStateObj();
   const topicObj = await getTopicObj();
   
-  let parsedTopic = { title: "", description: "" };
+  let parsedTopic = { 
+    theme1: { title: "", example: "" }, 
+    theme2: { title: "", example: "" } 
+  };
   try {
     parsedTopic = JSON.parse(topicObj.content);
   } catch (e) {}

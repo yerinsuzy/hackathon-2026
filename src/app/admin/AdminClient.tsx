@@ -17,7 +17,10 @@ export default function AdminClient({
   votedUsers: any[],
   votingDetails: Record<string, any[]>,
   initialStatus: "not_started" | "active" | "ended",
-  initialTopic: { title: string, description: string }
+  initialTopic: { 
+    theme1: { title: string, example: string }, 
+    theme2: { title: string, example: string } 
+  }
 }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -25,7 +28,7 @@ export default function AdminClient({
   
   const [activeTab, setActiveTab] = useState<"results" | "users" | "topic">("results");
   
-  const [topicState, setTopicState] = useState(initialTopic);
+  const [topicState, setTopicState] = useState(initialTopic as any);
   const [isSavingTopic, setIsSavingTopic] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -45,7 +48,7 @@ export default function AdminClient({
 
   const handleSaveTopic = async () => {
     setIsSavingTopic(true);
-    await setTopicObj(topicState.title, topicState.description);
+    await setTopicObj(topicState);
     
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
@@ -272,50 +275,97 @@ export default function AdminClient({
         )}
 
         {activeTab === "topic" && (
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-gray-100 max-w-2xl">
-            <p className="text-gray-500 mb-6">이곳에서 변경한 주제는 메인 페이지 상단에 노출됩니다. 비밀번호(0417)를 입력해야 참가자들이 확인할 수 있습니다.</p>
+          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-gray-100">
+            <p className="text-gray-500 mb-8 max-w-2xl">이곳에서 변경한 주제는 메인 페이지 상단에 노출됩니다. 2개의 대조되는 테마(업무/일상)를 설정할 수 있으며, 각 테마별 예시는 줄바꿈으로 구분해 입력해 주세요.</p>
             
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  오늘의 메인 주제 (Title)
-                </label>
-                <input
-                  type="text"
-                  value={topicState.title}
-                  onChange={(e) => setTopicState({...topicState, title: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none"
-                  placeholder="예: 업무 효율성을 높이는 AI 툴"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  상세 설명 또는 미션 (Description)
-                </label>
-                <textarea
-                  value={topicState.description}
-                  onChange={(e) => setTopicState({...topicState, description: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none h-32 resize-none"
-                  placeholder="예: 생성형 AI API를 활용하여 사내 불편을 해소하는 서비스를 만드세요."
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Theme 1: 업무 */}
+              <div className="p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                <div className="flex items-center gap-2 mb-6 text-indigo-900 font-black">
+                  <div className="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-xs">1</div>
+                  <h3 className="text-lg">테마 1: 업무 특화</h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">메인 주제 제목</label>
+                    <input
+                      type="text"
+                      value={topicState?.theme1?.title || ""}
+                      onChange={(e) => setTopicState({
+                        ...topicState, 
+                        theme1: { ...topicState.theme1, title: e.target.value } 
+                      })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white font-medium"
+                      placeholder="예: 까칠한 동료보다 나은 업무 도우미"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">아이디어 예시 (줄바꿈으로 구분)</label>
+                    <textarea
+                      value={topicState?.theme1?.example || ""}
+                      onChange={(e) => setTopicState({
+                        ...topicState, 
+                        theme1: { ...topicState.theme1, example: e.target.value } 
+                      })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none h-32 resize-none bg-white font-medium text-sm leading-relaxed"
+                      placeholder="한 줄에 하나씩 예시를 입력하세요."
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-between border-t border-gray-100">
-                {saveSuccess ? (
-                  <span className="text-emerald-600 font-bold flex items-center gap-1">
-                    <CheckCircle2 size={18} /> 저장되었습니다
-                  </span>
-                ) : <span/>}
-                
-                <button
-                  onClick={handleSaveTopic}
-                  disabled={isSavingTopic}
-                  className="px-6 py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-xl disabled:bg-gray-400 transition-colors"
-                >
-                  {isSavingTopic ? "저장 중..." : "주제 업데이트"}
-                </button>
+              {/* Theme 2: 일상 */}
+              <div className="p-6 bg-purple-50/50 rounded-2xl border border-purple-100">
+                <div className="flex items-center gap-2 mb-6 text-purple-900 font-black">
+                  <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-xs">2</div>
+                  <h3 className="text-lg">테마 2: 일상/대중성</h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">메인 주제 제목</label>
+                    <input
+                      type="text"
+                      value={topicState?.theme2?.title || ""}
+                      onChange={(e) => setTopicState({
+                        ...topicState, 
+                        theme2: { ...topicState.theme2, title: e.target.value } 
+                      })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none bg-white font-medium"
+                      placeholder="예: 1%를 위하여. 대중성은 필요없다"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">아이디어 예시 (줄바꿈으로 구분)</label>
+                    <textarea
+                      value={topicState?.theme2?.example || ""}
+                      onChange={(e) => setTopicState({
+                        ...topicState, 
+                        theme2: { ...topicState.theme2, example: e.target.value } 
+                      })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none h-32 resize-none bg-white font-medium text-sm leading-relaxed"
+                      placeholder="한 줄에 하나씩 예시를 입력하세요."
+                    />
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <div className="pt-6 flex items-center justify-between border-t border-gray-100">
+              <div className="flex items-center gap-2">
+                {saveSuccess && (
+                  <span className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full text-sm font-bold flex items-center gap-1.5">
+                    <CheckCircle2 size={16} /> 설정이 저장되었습니다
+                  </span>
+                )}
+              </div>
+              
+              <button
+                onClick={handleSaveTopic}
+                disabled={isSavingTopic}
+                className="px-10 py-4 bg-gray-900 hover:bg-black text-white font-extrabold rounded-2xl disabled:bg-gray-400 transition-all active:scale-95 shadow-lg shadow-gray-200 disabled:shadow-none"
+              >
+                {isSavingTopic ? "저장 중..." : "주제 시스템 전체 업데이트"}
+              </button>
             </div>
           </div>
         )}
