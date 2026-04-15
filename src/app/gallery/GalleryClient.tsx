@@ -227,7 +227,7 @@ export default function GalleryClient({
               className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-extrabold rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-4 text-2xl"
             >
               <Trophy size={32} className="fill-white" />
-              🏆 우승 결과 보러가기
+              🏆 투표 결과 보러가기
             </button>
           )}
         </div>
