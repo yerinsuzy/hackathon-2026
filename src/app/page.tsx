@@ -84,7 +84,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative z-10 flex justify-center lg:justify-end">
+          <div className="relative z-10 hidden lg:flex justify-center lg:justify-end">
             <QRCodeDisplay />
           </div>
         </div>
