@@ -202,9 +202,9 @@ export default function AdminClient({
                               <div className="flex flex-wrap gap-2">
                                 {votersForThis.map((voter, i) => (
                                   <span key={i} className="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-gray-200 font-medium">
-                                    {voter.name}
+                                    {voter.name || voter.voterName}
                                     <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-                                      {voter.isParticipant ? `${voter.teamNumber}조` : "참관인"}
+                                      {voter.isParticipant ? `${voter.teamNumber ?? voter.voterTeam ?? '?'}조` : "참관인"}
                                     </span>
                                   </span>
                                 ))}
