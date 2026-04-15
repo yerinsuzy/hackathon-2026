@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppBaseContext } from "@/components/providers/AppProvider";
-import { UploadCloud, CheckCircle2, AlertCircle, Bold, Italic, List, Heading1, Heading2, Lock } from "lucide-react";
+import { UploadCloud, CheckCircle2, AlertCircle, Bold, Italic, List, Heading1, Heading2, Lock, Save } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { addProject } from "@/actions/projects";
+import { Suspense } from "react";
 
 // Editor component for Tiptap
 const MenuBar = ({ editor }: { editor: any }) => {

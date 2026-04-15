@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppBaseContext } from "@/components/providers/AppProvider";
-import { Heart, ExternalLink, Trophy, Users, AlertCircle, Maximize2, Trash2 } from "lucide-react";
+import { Heart, ExternalLink, Trophy, Users, AlertCircle, Maximize2, Trash2, Lock } from "lucide-react";
 import Link from "next/link";
 import { ProjectUI } from "@/types";
 import { castVote, removeVote } from "@/actions/votes";
@@ -34,6 +34,10 @@ export default function GalleryClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const [votingProjectId, setVotingProjectId] = useState<string | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
+  
+  const [isResultsPasswordModalOpen, setIsResultsPasswordModalOpen] = useState(false);
+  const [resultsPasswordInput, setResultsPasswordInput] = useState("");
+  const [resultsError, setResultsError] = useState("");
 
   // Polling every 30 seconds
   useEffect(() => {
@@ -120,11 +124,22 @@ export default function GalleryClient({
   };
 
   const handleRevealWinner = () => {
-    setIsRevealing(true);
-    setTimeout(() => {
-      setIsRevealing(false);
-      setWinnerOverlayOpen(true);
-    }, 3000); // 3 seconds of suspense!
+    setIsResultsPasswordModalOpen(true);
+    setResultsPasswordInput("");
+    setResultsError("");
+  };
+
+  const confirmRevealResults = () => {
+    if (resultsPasswordInput === "0417") {
+      setIsResultsPasswordModalOpen(false);
+      setIsRevealing(true);
+      setTimeout(() => {
+        setIsRevealing(false);
+        setWinnerOverlayOpen(true);
+      }, 3000); // 3 seconds of suspense!
+    } else {
+      setResultsError("비밀번호가 틀렸습니다.");
+    }
   };
 
   const visibleProjects = [...projects].sort((a, b) => a.teamNumber - b.teamNumber);
@@ -247,6 +262,31 @@ export default function GalleryClient({
           totalVotes={votesMap ? Object.keys(votesMap).length : 0}
           onClose={() => setWinnerOverlayOpen(false)} 
         />
+      )}
+
+      {/* Results Password Modal */}
+      {isResultsPasswordModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Lock className="text-indigo-600" />
+              <h3 className="text-lg font-bold">결과 확인 비밀번호</h3>
+            </div>
+            <input
+              type="password"
+              value={resultsPasswordInput}
+              onChange={(e) => setResultsPasswordInput(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 mb-2"
+              placeholder="비밀번호 입력"
+              onKeyDown={(e) => e.key === 'Enter' && confirmRevealResults()}
+            />
+            {resultsError && <p className="text-red-500 text-sm mb-4">{resultsError}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setIsResultsPasswordModalOpen(false)} className="flex-1 py-2 rounded-lg bg-gray-100">취소</button>
+              <button onClick={confirmRevealResults} className="flex-1 py-2 rounded-lg bg-indigo-600 text-white">확인</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}
