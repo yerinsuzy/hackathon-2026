@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const schedule = [
     { time: "10:00 - 11:30", title: "아이디에이션", desc: "주제에 맞춘 아이디어 발상 및 기획" },
-    { time: "13:00 - 16:00", title: "바이브코딩", desc: "본격적인 프로토타입 디자인 및 개발" },
+    { time: "13:00 - 16:00", title: "바이브코딩", desc: "본격적인 프로토타입 디자인 및 개발 (*안정적인 제출을 위해 15:30부터 배포 진행 권장)" },
     { time: "16:00 - 17:00", title: "완성본 제출 및 쇼케이스", desc: "프로젝트 업로드 및 투표" },
     { time: "17:00 - 17:30", title: "시상 및 마무리", desc: "투표 발표 및 클로징" },
   ];
