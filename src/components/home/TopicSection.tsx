@@ -173,7 +173,7 @@ export default function TopicSection({ initialTopic }: { initialTopic: TopicData
                       
                       <div className="relative z-10">
                         <span className="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-[10px] font-black tracking-widest uppercase rounded-full border border-purple-500/30 mb-6">
-                          Theme 02. 일상/대중성
+                          Theme 02. 일상
                         </span>
                         <h4 className="text-2xl sm:text-3xl font-black text-white mb-6 leading-tight break-keep">
                           {topic.theme2?.title || "주제를 입력해주세요"}

@@ -318,7 +318,7 @@ export default function AdminClient({
               <div className="p-6 bg-purple-50/50 rounded-2xl border border-purple-100">
                 <div className="flex items-center gap-2 mb-6 text-purple-900 font-black">
                   <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-xs">2</div>
-                  <h3 className="text-lg">테마 2: 일상/대중성</h3>
+                  <h3 className="text-lg">테마 2: 일상</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
