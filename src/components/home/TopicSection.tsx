@@ -116,19 +116,17 @@ export default function TopicSection({ initialTopic }: { initialTopic: TopicData
                 </div>
               ) : (
                 <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-                  <div className="flex justify-between items-center py-6 border-b border-white/5 mb-8">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
-                        <Lightbulb size={24} />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-black text-white tracking-tight">오늘의 주제</h3>
-                        <p className="text-white/40 text-xs font-medium uppercase tracking-widest">두 테마 중 하나를 선택해 보세요</p>
-                      </div>
+                  <div className="relative flex flex-col items-center py-6 border-b border-white/5 mb-8">
+                    <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400 mb-2">
+                      <Lightbulb size={24} />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-xl font-black text-white tracking-tight">오늘의 주제</h3>
+                      <p className="text-white/40 text-xs font-medium uppercase tracking-widest">두 테마 중 하나를 선택해 보세요</p>
                     </div>
                     <button 
                       onClick={handleClose}
-                      className="p-2.5 text-white/30 hover:text-rose-400 hover:bg-rose-400/10 rounded-xl transition-all border border-transparent hover:border-rose-400/20"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 p-2.5 text-white/30 hover:text-rose-400 hover:bg-rose-400/10 rounded-xl transition-all border border-transparent hover:border-rose-400/20"
                     >
                       <ChevronUp size={24} />
                     </button>
