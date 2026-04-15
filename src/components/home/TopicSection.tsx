@@ -33,9 +33,7 @@ export default function TopicSection({ initialTopic }: { initialTopic: TopicData
 
   const handleToggle = (e: React.MouseEvent<HTMLDetailsElement>) => {
     e.preventDefault();
-    if (!isUnlocked) {
-      setIsOpen(!isOpen);
-    }
+    setIsOpen(!isOpen);
   };
 
   const handleUnlock = (e: React.FormEvent) => {
