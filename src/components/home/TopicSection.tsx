@@ -94,7 +94,7 @@ export default function TopicSection({ initialTopic }: { initialTopic: TopicData
                     <Lock size={32} />
                   </div>
                   <h4 className="text-xl font-bold text-white mb-2">비밀번호 보호됨</h4>
-                  <p className="text-indigo-200/60 text-sm mb-8">모니터링 화면(Admin)에 표시된 비밀번호를 입력해주세요.</p>
+                  <p className="text-indigo-200/60 text-sm mb-8">공유받은 비밀번호를 입력해주세요.</p>
                   
                   <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-3">
                     <input
