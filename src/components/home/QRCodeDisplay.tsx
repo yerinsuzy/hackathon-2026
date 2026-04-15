@@ -16,7 +16,7 @@ export default function QRCodeDisplay() {
   if (!mounted) return null;
 
   return (
-    <div className="flex flex-col items-center gap-6 py-12 px-8 rounded-[40px] bg-gradient-to-b from-white to-indigo-50/30 border border-indigo-100/50 shadow-2xl shadow-indigo-100/20 backdrop-blur-sm relative overflow-hidden group">
+    <div className="hidden lg:flex flex-col items-center gap-6 py-12 px-8 rounded-[40px] bg-gradient-to-b from-white to-indigo-50/30 border border-indigo-100/50 shadow-2xl shadow-indigo-100/20 backdrop-blur-sm relative overflow-hidden group">
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-24 h-24 bg-indigo-500/5 blur-[60px] rounded-full" />
       <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/5 blur-[80px] rounded-full" />

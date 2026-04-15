@@ -122,7 +122,7 @@ export default function TopicSection({ initialTopic }: { initialTopic: TopicData
                         <Lightbulb size={24} />
                       </div>
                       <div>
-                        <h3 className="text-xl font-black text-white tracking-tight">Today&apos;s Hybrid Topics</h3>
+                        <h3 className="text-xl font-black text-white tracking-tight">오늘의 주제</h3>
                         <p className="text-white/40 text-xs font-medium uppercase tracking-widest">두 테마 중 하나를 선택해 보세요</p>
                       </div>
                     </div>

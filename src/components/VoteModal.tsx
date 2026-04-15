@@ -127,7 +127,7 @@ export default function VoteModal({
                 </div>
               )}
 
-              <div className="flex flex-col items-center p-6 bg-gray-50 rounded-2xl mb-2 border border-gray-100">
+              <div className="hidden lg:flex flex-col items-center p-6 bg-gray-50 rounded-2xl mb-2 border border-gray-100">
                 <p className="text-sm text-gray-500 mb-3 font-medium">모바일 기기로 투표하려면 이 QR코드를 스캔하세요</p>
                 <div className="p-3 bg-white rounded-xl shadow-sm border border-gray-200">
                   <QRCode value={currentUrl} size={120} />

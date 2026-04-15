@@ -63,8 +63,8 @@ export default async function Home() {
                 <span className="text-indigo-300">지금 바로 참여하세요</span>
               </h2>
               <p className="text-indigo-100/80 text-lg md:text-xl max-w-md">
-                팀원들과 함께 아이디어를 실현하고, 다른 팀의 혁신적인 결과물을 확인해보세요. 
-                투표를 통해 올해의 우수작을 직접 선정할 수 있습니다.
+                조원들과 함께 아이디어를 실현하고, 다른 조의 창의적인 결과물도 확인해보세요. 
+                투표를 통해 가장 마음에 드는 결과물에 좋아요 ❤️ 를 눌러주세요!
               </p>
             </div>
 
